@@ -2,6 +2,11 @@
 
 A Telegram bot to help you link anime, manga, and ranobe sources
 
+## Selfhosting
+
+You can adapt our `./infra` to your needs. See [./infra/README.md](./infra/README.md)
+for further details.
+
 ## Licensing
 
 Never Knows Sauce — find and link anime, manga, and ranobe sources
