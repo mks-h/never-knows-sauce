@@ -7,19 +7,17 @@ import { getAppServices } from "./services/index.ts";
 const validateEnvironmentVariables = (vars: {
   [key: string]: EnvVariable & { value: string | undefined };
 }) => {
-  Object.keys(vars).forEach((varName) => {
-    const variable = vars[varName];
-
+  for (const [varName, variable] of Object.entries(vars)) {
     if (variable.required && !variable.value) {
       throw new Error(
-        `${varName} is required for project startup. Please check your '.env' file.`,
+        `${varName} is required for project startup.`,
       );
     }
 
-    if (!variable.value && !!variable.default) {
-      vars[varName].value = variable.default;
+    if (!variable.value && variable.default) {
+      variable.value = variable.default;
     }
-  });
+  }
 };
 
 const prepareAppConfig = (): AppConfig => {
