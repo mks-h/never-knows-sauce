@@ -1,4 +1,4 @@
 export interface IInitializable {
-  initialize(): Promise<void>;
-  isInitialized: boolean;
+	initialize(): Promise<void>;
+	isInitialized: boolean;
 }
