@@ -1,7 +1,8 @@
 {
   "tasks": {
-    "dev": "deno run --watch --allow-read --allow-env main.ts",
-    "format": "deno fmt"
+    "run": "deno run --allow-env --allow-read main.ts",
+    "dev": "deno run --allow-env --allow-read --watch main.ts",
+    "check": "deno check --all main.ts"
   },
   "compilerOptions": {
     "noImplicitReturns": true,
