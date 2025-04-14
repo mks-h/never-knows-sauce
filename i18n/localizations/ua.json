@@ -1,4 +1,4 @@
 {
-  "hello.world": "Пес патрон!",
-  "greetings": "Привіт, {{userName}}"
+	"hello.world": "Пес патрон!",
+	"greetings": "Привіт, {{userName}}"
 }
