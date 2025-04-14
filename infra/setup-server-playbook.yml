@@ -1,0 +1,66 @@
+- name: Setup firewall
+  hosts: prod
+  tasks:
+    - name: Ensure Firewalld is installed
+      become: true
+      package:
+        name: firewalld
+        state: present
+
+    - name: Ensure Firewalld enables necessary services
+      become: true
+      firewalld:
+        service: "{{ item }}"
+        state: enabled
+        permanent: true
+      loop:
+        - ssh
+        - http
+        - https
+      register: services
+
+    - name: Ensure Firewalld is enabled and running
+      become: true
+      systemd:
+        name: firewalld
+        state: started
+        enabled: true
+        daemon_reload: true
+
+    - name: Reload Firewalld
+      become: true
+      systemd:
+        name: firewalld
+        state: reloaded
+      when: services.changed
+
+- name: Setup reverse proxy
+  hosts: prod
+  tasks:
+    - name: Ensure Caddy is installed
+      become: true
+      package:
+        name: caddy
+        state: present
+
+    - name: Ensure Caddy is enabled and running
+      become: true
+      systemd:
+        name: caddy
+        state: started
+        enabled: true
+        daemon_reload: true
+
+    - name: Ensure Caddy config is present
+      become: true
+      copy:
+        src: ./Caddyfile
+        dest: /etc/caddy/Caddyfile
+      register: config
+
+    - name: Reload Caddy
+      become: true
+      systemd:
+        name: caddy
+        state: reloaded
+      when: config.changed

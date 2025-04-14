@@ -1,0 +1,11 @@
+nks.bots.autoreiv.net {
+	reverse_proxy localhost:8000
+}
+
+dev1.nks.bots.autoreiv.net {
+	reverse_proxy localhost:8001
+}
+
+dev2.nks.bots.autoreiv.net {
+	reverse_proxy localhost:8002
+}

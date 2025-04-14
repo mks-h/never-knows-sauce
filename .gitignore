@@ -1,4 +1,5 @@
 .env
+inventory.yml
 
 /.idea/
 /.vs/
