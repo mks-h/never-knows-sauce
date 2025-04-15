@@ -1,4 +1,4 @@
 {
-  "hello.world": "Hello World!",
-  "greetings": "Hello, {{userName}}"
+	"hello.world": "Hello World!",
+	"greetings": "Hello, {{userName}}"
 }
