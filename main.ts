@@ -6,32 +6,30 @@ import { getAppServices } from "./src/services/index.ts";
 import { IDisposable } from "./src/interfaces/index.ts";
 
 const validateEnvironmentVariables = (vars: {
-  [key: string]: EnvVariable & { value: string | undefined };
+	[key: string]: EnvVariable & { value: string | undefined };
 }) => {
-  Object.keys(vars).forEach((varName) => {
-    const variable = vars[varName];
+	for (const [varName, variable] of Object.entries(vars)) {
+		if (variable.required && !variable.value) {
+			throw new Error(
+				`${varName} is required for project startup.`,
+			);
+		}
 
-    if (variable.required && !variable.value) {
-      throw new Error(
-        `${varName} is required for project startup. Please check your '.env' file.`
-      );
-    }
-
-    if (!variable.value && !!variable.default) {
-      vars[varName].value = variable.default;
-    }
-  });
+		if (!variable.value && variable.default) {
+			variable.value = variable.default;
+		}
+	}
 };
 
 const prepareAppConfig = (): AppConfig => {
-  validateEnvironmentVariables(AppConfigEnvVariables);
+	validateEnvironmentVariables(AppConfigEnvVariables);
 
-  return {
-    DbConnectionString: AppConfigEnvVariables.DB_CONNECTION_STRING.value!,
-    TelegramToken: AppConfigEnvVariables.TELEGRAM_TOKEN.value!,
-    DefaultLanguage: AppConfigEnvVariables.DEFAULT_LANGUAGE.value!,
-    IsDebug: AppConfigEnvVariables.DEBUG.value === "1",
-  };
+	return {
+		DbConnectionString: AppConfigEnvVariables.DB_CONNECTION_STRING.value!,
+		TelegramToken: AppConfigEnvVariables.TELEGRAM_TOKEN.value!,
+		DefaultLanguage: AppConfigEnvVariables.DEFAULT_LANGUAGE.value!,
+		IsDebug: AppConfigEnvVariables.DEBUG.value === "1",
+	};
 };
 
 async function start() {
@@ -40,22 +38,22 @@ async function start() {
   try {
     const appConfig = prepareAppConfig();
 
-    await configure({
-      sinks: { console: getConsoleSink() },
-      loggers: [
-        {
-          category: "app",
-          lowestLevel: appConfig.IsDebug ? "debug" : "info",
-          sinks: ["console"],
-        },
-      ],
-    });
+		await configure({
+			sinks: { console: getConsoleSink() },
+			loggers: [
+				{
+					category: "app",
+					lowestLevel: appConfig.IsDebug ? "debug" : "info",
+					sinks: ["console"],
+				},
+			],
+		});
 
-    const logger = getLogger("app");
+		const logger = getLogger("app");
 
-    logger.debug`ENV VARIABLES:\n${appConfig}`;
+		logger.debug`ENV VARIABLES:\n${appConfig}`;
 
-    const services = await getAppServices(appConfig, logger);
+		const services = await getAppServices(appConfig, logger);
 
     const serviceNames = Object.keys(services.cradle);
 
@@ -92,5 +90,5 @@ async function start() {
 }
 
 if (import.meta.main) {
-  await start();
+	await start();
 }
