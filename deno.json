@@ -2,7 +2,8 @@
 	"tasks": {
 		"run": "deno run --allow-read --allow-env --allow-sys --allow-net main.ts",
 		"dev": "deno run --allow-read --allow-env --allow-sys --allow-net --watch main.ts",
-		"check": "deno check --all main.ts"
+		"check": "deno check --all main.ts",
+		"format": "deno fmt"
 	},
 	"compilerOptions": {
 		"noImplicitReturns": true,

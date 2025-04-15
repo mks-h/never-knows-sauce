@@ -5,8 +5,8 @@ import { Schema } from "npm:mongoose";
 export type ApplicationModels = "LocalizationEntry";
 
 export const ApplicationSchemas: { [key in ApplicationModels]: Schema } = {
-  LocalizationEntry: LocalizationEntrySchema,
+	LocalizationEntry: LocalizationEntrySchema,
 };
 
-export type ModelType<T extends ApplicationModels> =
-  T extends "LocalizationEntry" ? LocalizationEntry : BaseModel;
+export type ModelType<T extends ApplicationModels> = T extends
+	"LocalizationEntry" ? LocalizationEntry : BaseModel;

@@ -33,10 +33,10 @@ const prepareAppConfig = (): AppConfig => {
 };
 
 async function start() {
-  let disposableServices: IDisposable[] = [];
+	let disposableServices: IDisposable[] = [];
 
-  try {
-    const appConfig = prepareAppConfig();
+	try {
+		const appConfig = prepareAppConfig();
 
 		await configure({
 			sinks: { console: getConsoleSink() },
@@ -55,38 +55,39 @@ async function start() {
 
 		const services = await getAppServices(appConfig, logger);
 
-    const serviceNames = Object.keys(services.cradle);
+		const serviceNames = Object.keys(services.cradle);
 
-    disposableServices = serviceNames.reduce((acc, next) => {
-      if (services.cradle[next].dispose) {
-        return [...acc, services.cradle[next]];
-      }
+		disposableServices = serviceNames.reduce((acc, next) => {
+			if (services.cradle[next].dispose) {
+				return [...acc, services.cradle[next]];
+			}
 
-      return acc;
-    }, new Array<IDisposable>());
+			return acc;
+		}, new Array<IDisposable>());
 
-    const app: Application = services.cradle["application"];
+		const app: Application = services.cradle["application"];
 
-    await app.start();
-  } catch (error) {
-    await configure({
-      sinks: { console: getConsoleSink() },
-      loggers: [
-        {
-          category: "service",
-          lowestLevel: "fatal",
-          sinks: ["console"],
-        },
-      ],
-      reset: true,
-    });
-    const serviceLogger = getLogger("service");
-    serviceLogger.fatal`Something went wrong during application execution: ${error}`;
-  } finally {
-    await Promise.all(
-      disposableServices.map(async (service) => await service.dispose())
-    );
-  }
+		await app.start();
+	} catch (error) {
+		await configure({
+			sinks: { console: getConsoleSink() },
+			loggers: [
+				{
+					category: "service",
+					lowestLevel: "fatal",
+					sinks: ["console"],
+				},
+			],
+			reset: true,
+		});
+		const serviceLogger = getLogger("service");
+		serviceLogger
+			.fatal`Something went wrong during application execution: ${error}`;
+	} finally {
+		await Promise.all(
+			disposableServices.map(async (service) => await service.dispose()),
+		);
+	}
 }
 
 if (import.meta.main) {
