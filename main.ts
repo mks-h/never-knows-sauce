@@ -1,8 +1,9 @@
-import { Application } from "./app.ts";
-import { EnvVariable } from "./config/AppConfig.ts";
-import { AppConfig, AppConfigEnvVariables } from "./config/index.ts";
+import { Application } from "./src/app.ts";
+import { EnvVariable } from "./src/config/AppConfig.ts";
+import { AppConfig, AppConfigEnvVariables } from "./src/config/index.ts";
 import { configure, getConsoleSink, getLogger } from "@logtape/logtape";
-import { getAppServices } from "./services/index.ts";
+import { getAppServices } from "./src/services/index.ts";
+import { IDisposable } from "./src/interfaces/index.ts";
 
 const validateEnvironmentVariables = (vars: {
   [key: string]: EnvVariable & { value: string | undefined };
@@ -12,7 +13,7 @@ const validateEnvironmentVariables = (vars: {
 
     if (variable.required && !variable.value) {
       throw new Error(
-        `${varName} is required for project startup. Please check your '.env' file.`,
+        `${varName} is required for project startup. Please check your '.env' file.`
       );
     }
 
@@ -34,6 +35,8 @@ const prepareAppConfig = (): AppConfig => {
 };
 
 async function start() {
+  let disposableServices: IDisposable[] = [];
+
   try {
     const appConfig = prepareAppConfig();
 
@@ -54,13 +57,19 @@ async function start() {
 
     const services = await getAppServices(appConfig, logger);
 
-    const app = new Application(
-      appConfig,
-      logger,
-      services.LocalizationService,
-    );
+    const serviceNames = Object.keys(services.cradle);
 
-    app.start();
+    disposableServices = serviceNames.reduce((acc, next) => {
+      if (services.cradle[next].dispose) {
+        return [...acc, services.cradle[next]];
+      }
+
+      return acc;
+    }, new Array<IDisposable>());
+
+    const app: Application = services.cradle["application"];
+
+    await app.start();
   } catch (error) {
     await configure({
       sinks: { console: getConsoleSink() },
@@ -74,8 +83,11 @@ async function start() {
       reset: true,
     });
     const serviceLogger = getLogger("service");
-    serviceLogger
-      .fatal`Something went wrong during application execution: ${error}`;
+    serviceLogger.fatal`Something went wrong during application execution: ${error}`;
+  } finally {
+    await Promise.all(
+      disposableServices.map(async (service) => await service.dispose())
+    );
   }
 }
 
