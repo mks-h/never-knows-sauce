@@ -16,7 +16,8 @@
 		"semiColons": true,
 		"singleQuote": false,
 		"lineWidth": 80,
-		"proseWrap": "preserve"
+		"proseWrap": "preserve",
+		"exclude": ["./README.md"]
 	},
 	"imports": {
 		"@logtape/logtape": "jsr:@logtape/logtape@^0.9.0",
