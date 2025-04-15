@@ -12,7 +12,11 @@
 		"noUncheckedIndexedAccess": true
 	},
 	"fmt": {
-		"useTabs": true
+		"useTabs": true,
+		"semiColons": true,
+		"singleQuote": false,
+		"lineWidth": 80,
+		"proseWrap": "preserve"
 	},
 	"imports": {
 		"@logtape/logtape": "jsr:@logtape/logtape@^0.9.0",
