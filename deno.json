@@ -1,7 +1,7 @@
 {
 	"tasks": {
-		"run": "deno run --allow-env --allow-read main.ts",
-		"dev": "deno run --allow-env --allow-read --watch main.ts",
+		"run": "deno run --allow-read --allow-env --allow-sys --allow-net main.ts",
+		"dev": "deno run --allow-read --allow-env --allow-sys --allow-net --watch main.ts",
 		"check": "deno check --all main.ts"
 	},
 	"compilerOptions": {
@@ -11,7 +11,8 @@
 		"noUncheckedIndexedAccess": true
 	},
 	"fmt": {
-		"useTabs": true
+		"useTabs": true,
+		"exclude": ["./README.md"]
 	},
 	"imports": {
 		"@logtape/logtape": "jsr:@logtape/logtape@^0.9.0",

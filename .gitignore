@@ -7,3 +7,6 @@
 # MacOS generated files
 .DS_Store
 
+#Ignore Prettier config files
+.prettierrc.*
+prettier.config.*

@@ -1,18 +1,14 @@
 import { Logger } from "@logtape/logtape";
-import { AppConfig } from "./config/index.ts";
-import { ILocalizationService } from "./services/index.ts";
+import { LocalizationService } from "./services/LocalizationService.ts";
 
 export class Application {
-	private readonly appConfig: AppConfig;
 	private readonly logger: Logger;
-	private readonly localizationService: ILocalizationService;
+	private readonly localizationService: LocalizationService;
 
 	constructor(
-		appConfig: AppConfig,
 		logger: Logger,
-		localizationService: ILocalizationService,
+		localizationService: LocalizationService,
 	) {
-		this.appConfig = appConfig;
 		this.logger = logger;
 		this.localizationService = localizationService;
 	}
