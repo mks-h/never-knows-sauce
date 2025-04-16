@@ -1,17 +1,18 @@
-import { Application } from "./app.ts";
-import { EnvVariable } from "./config/AppConfig.ts";
-import { AppConfig, AppConfigEnvVariables } from "./config/index.ts";
 import { configure, getConsoleSink, getLogger } from "@logtape/logtape";
-import { getAppServices } from "./services/index.ts";
+import {
+	AppConfig,
+	AppConfigEnvVariables,
+	EnvVariable,
+} from "./src/config/index.ts";
+import { getAppServices } from "./src/services/index.ts";
+import { Application } from "./src/app.ts";
 
 const validateEnvironmentVariables = (vars: {
 	[key: string]: EnvVariable & { value: string | undefined };
 }) => {
 	for (const [varName, variable] of Object.entries(vars)) {
 		if (variable.required && !variable.value) {
-			throw new Error(
-				`${varName} is required for project startup.`,
-			);
+			throw new Error(`${varName} is required for project startup.`);
 		}
 
 		if (!variable.value && variable.default) {
@@ -32,6 +33,7 @@ const prepareAppConfig = (): AppConfig => {
 };
 
 async function start() {
+	let disposableServices: { dispose: () => Promise<void> }[] = [];
 	try {
 		const appConfig = prepareAppConfig();
 
@@ -52,11 +54,9 @@ async function start() {
 
 		const services = await getAppServices(appConfig, logger);
 
-		const app = new Application(
-			appConfig,
-			logger,
-			services.LocalizationService,
-		);
+		disposableServices = [services.DbClient];
+
+		const app = new Application(logger, services.LocalizationService);
 
 		app.start();
 	} catch (error) {
@@ -74,6 +74,10 @@ async function start() {
 		const serviceLogger = getLogger("service");
 		serviceLogger
 			.fatal`Something went wrong during application execution: ${error}`;
+	} finally {
+		await Promise.all(
+			disposableServices.map(async (service) => await service.dispose()),
+		);
 	}
 }
 

@@ -1,18 +1,7 @@
 import { Logger } from "@logtape/logtape";
 import { getLocalizationsFromFiles, Locales } from "../i18n/i18n.ts";
-import { BaseLocalizationService } from "./index.ts";
-import { IInitializable } from "../interfaces/index.ts";
 
-export interface ILocalizationService {
-	getTranslation(
-		key: string,
-		templateValues?: { [key: string]: string },
-		locale?: string,
-	): string;
-}
-
-export class LocalizationService extends BaseLocalizationService
-	implements ILocalizationService, IInitializable {
+export class LocalizationService {
 	public isInitialized: boolean;
 
 	private readonly logger: Logger;
@@ -20,7 +9,6 @@ export class LocalizationService extends BaseLocalizationService
 	private localizations?: Locales;
 
 	constructor(logger: Logger, defaultLanguage: string) {
-		super();
 		this.logger = logger;
 		this.isInitialized = false;
 		this.defaultLanguage = defaultLanguage;
@@ -79,5 +67,22 @@ export class LocalizationService extends BaseLocalizationService
 			targetLocalization,
 			templateValues,
 		);
+	}
+
+	applyTemplateValuesToLocalization(
+		localization: string,
+		templateValues?: { [key: string]: string },
+	): string {
+		if (!templateValues) {
+			return localization;
+		}
+
+		let result = localization;
+
+		Object.entries(templateValues).forEach(([key, value]) => {
+			result = result.replaceAll(`{{${key}}}`, value);
+		});
+
+		return result;
 	}
 }
