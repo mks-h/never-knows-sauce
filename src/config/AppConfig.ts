@@ -1,8 +1,10 @@
 import "jsr:@std/dotenv/load";
+import { TelegramStrategy } from "../services/TelegramService.ts";
 
 export interface AppConfig {
 	dbConnectionString: string;
 	telegramToken: string;
+	telegramStrategy: TelegramStrategy;
 	defaultLanguage: string;
 	isDebug: boolean;
 }
@@ -14,6 +16,7 @@ export const prepareAppConfig = (): AppConfig => {
 	return {
 		dbConnectionString: required.DB_CONNECTION_STRING,
 		telegramToken: required.TELEGRAM_TOKEN,
+		telegramStrategy: validateTelegramStrategy(required.TELEGRAM_STRATEGY),
 		defaultLanguage: optional.DEFAULT_LANGUAGE,
 		isDebug: optional.DEBUG === "1",
 	};
@@ -22,6 +25,7 @@ export const prepareAppConfig = (): AppConfig => {
 export function getRequiredVars() {
 	const requiredVars = [
 		"TELEGRAM_TOKEN",
+		"TELEGRAM_STRATEGY",
 		"DB_CONNECTION_STRING",
 	] as const;
 
@@ -54,4 +58,17 @@ function getOptionalVars() {
 	return res as {
 		[key in keyof typeof optionalVars]: string;
 	};
+}
+
+function validateTelegramStrategy(value: string) {
+	switch (value) {
+		case "webhook":
+			return TelegramStrategy.Webhook;
+		case "longpolling":
+			return TelegramStrategy.LongPolling;
+		default:
+			throw new Error(
+				`The specified telegram strategy is not expected: ${value}`,
+			);
+	}
 }

@@ -28,7 +28,7 @@ async function start() {
 			appConfig.defaultLanguage,
 		);
 
-		const app = new Application(logger, localizationService);
+		const app = new Application(logger, localizationService, appConfig);
 
 		app.start();
 	} catch (error) {
