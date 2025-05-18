@@ -5,6 +5,8 @@ export async function initLocalazationService(
 	logger: Logger,
 	defaultLanguage: string,
 ): Promise<LocalizationService> {
+	logger = logger.getChild("localization-service");
+
 	const localizations = await getLocalizationsFromFiles();
 
 	logger.debug`App found next localizations: ${
