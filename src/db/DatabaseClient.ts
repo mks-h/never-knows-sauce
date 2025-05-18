@@ -2,6 +2,8 @@ import mongoose, { Schema } from "npm:mongoose";
 import { Logger } from "@logtape/logtape";
 
 export function initDbClient(logger: Logger, connectionString: string) {
+	logger = logger.getChild("db-client");
+
 	const connection = mongoose.createConnection(connectionString);
 	logger.info`MongoDb connection was successfully created.`;
 	logger.debug`MongoDb connection string: ${connectionString}`;
