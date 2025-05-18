@@ -9,7 +9,7 @@ export function initDbClient(logger: Logger, connectionString: string) {
 	return new DbClient(logger, connection);
 }
 
-export class DbClient {
+export class DbClient implements AsyncDisposable {
 	constructor(
 		private logger: Logger,
 		private connection: mongoose.Connection,
@@ -22,7 +22,7 @@ export class DbClient {
 		return this.connection.model<T>(name, schema);
 	}
 
-	async dispose() {
+	async [Symbol.asyncDispose]() {
 		this.logger.info`MongoDB connection was closed`;
 		await this.connection.close();
 	}
