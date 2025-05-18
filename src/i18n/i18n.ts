@@ -7,7 +7,7 @@ export interface Locales {
 	};
 }
 
-export const getLocalizationsFromFiles = async () => {
+export async function getLocalizationsFromFiles(): Promise<Locales> {
 	const dirPath = `${import.meta.dirname}/localizations/`;
 	const files = await readdir(dirPath);
 
@@ -27,4 +27,4 @@ export const getLocalizationsFromFiles = async () => {
 	return data.reduce((acc, next) => {
 		return { ...acc, [next.locale]: next.data };
 	}, {});
-};
+}
