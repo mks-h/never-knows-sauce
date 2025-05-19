@@ -3,8 +3,8 @@ import {
 	AppConfig,
 	AppConfigEnvVariables,
 	EnvVariable,
-} from "./src/config/index.ts";
-import { initLocalazationService } from "./src/services/index.ts";
+} from "./src/config/AppConfig.ts";
+import { initLocalazationService } from "./src/services/LocalizationService.ts";
 import { Application } from "./src/app.ts";
 import { initDbClient } from "./src/db/DatabaseClient.ts";
 
