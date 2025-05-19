@@ -1,37 +1,8 @@
 import { configure, getConsoleSink, getLogger } from "@logtape/logtape";
-import {
-	AppConfig,
-	AppConfigEnvVariables,
-	EnvVariable,
-} from "./src/config/AppConfig.ts";
 import { initLocalazationService } from "./src/services/LocalizationService.ts";
 import { Application } from "./src/app.ts";
 import { initDbClient } from "./src/db/DatabaseClient.ts";
-
-const validateEnvironmentVariables = (vars: {
-	[key: string]: EnvVariable & { value: string | undefined };
-}) => {
-	for (const [varName, variable] of Object.entries(vars)) {
-		if (variable.required && !variable.value) {
-			throw new Error(`${varName} is required for project startup.`);
-		}
-
-		if (!variable.value && variable.default) {
-			variable.value = variable.default;
-		}
-	}
-};
-
-const prepareAppConfig = (): AppConfig => {
-	validateEnvironmentVariables(AppConfigEnvVariables);
-
-	return {
-		DbConnectionString: AppConfigEnvVariables.DB_CONNECTION_STRING.value!,
-		TelegramToken: AppConfigEnvVariables.TELEGRAM_TOKEN.value!,
-		DefaultLanguage: AppConfigEnvVariables.DEFAULT_LANGUAGE.value!,
-		IsDebug: AppConfigEnvVariables.DEBUG.value === "1",
-	};
-};
+import { prepareAppConfig } from "./src/config/AppConfig.ts";
 
 async function start() {
 	try {
@@ -42,19 +13,19 @@ async function start() {
 			loggers: [
 				{
 					category: "app",
-					lowestLevel: appConfig.IsDebug ? "debug" : "info",
+					lowestLevel: appConfig.isDebug ? "debug" : "info",
 					sinks: ["console"],
 				},
 			],
 		});
 
 		const logger = getLogger("app");
-		logger.debug`ENV VARIABLES:\n${appConfig}`;
+		logger.debug`ENV VARIABLES: ${appConfig}`;
 
-		await using _dbClient = initDbClient(logger, appConfig.DbConnectionString);
+		await using _dbClient = initDbClient(logger, appConfig.dbConnectionString);
 		const localizationService = await initLocalazationService(
 			logger,
-			appConfig.DefaultLanguage,
+			appConfig.defaultLanguage,
 		);
 
 		const app = new Application(logger, localizationService);
