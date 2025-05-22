@@ -9,35 +9,24 @@ import { AppConfig } from "./config/AppConfig.ts";
 export class Application {
 	constructor(
 		private readonly logger: Logger,
-		private readonly localizationService: LocalizationService,
+		private readonly l10n: LocalizationService,
 		private readonly appConfig: AppConfig,
 	) {}
 
 	public async start(): Promise<void> {
 		this.logger.info`Application has been started.`;
 
-		this.logger.info`${this.localizationService.getTranslation("hello.world")}`;
-		this.logger.info`${
-			this.localizationService.getTranslation(
-				"hello.world",
-				{},
-				"en",
-			)
-		}`;
-		this.logger.info`${
-			this.localizationService.getTranslation(
-				"hello.world",
-				{},
-				"ua",
-			)
-		}`;
+		this.logger.info`${this.l10n.getTranslation("hello.world")}`;
+		this.logger.info`${this.l10n.getTranslation("hello.world", {}, "en")}`;
+		this.logger.info`${this.l10n.getTranslation("hello.world", {}, "ua")}`;
 
 		const tgService = new TelegramBotService(
 			this.logger.getChild("telegram-bot-service"),
 			this.appConfig.telegramToken,
+			this.l10n,
 		);
 
-		const me = await tgService.getMe();
+		const me = await tgService.identifyBot();
 		this.logger.info`Connected Telegram bot information: ${me}`;
 
 		switch (this.appConfig.telegramStrategy) {
@@ -54,7 +43,9 @@ export class Application {
 				break;
 			}
 			default: {
-				throw new Error(`The value of telegram strategy is erroneous: ${this.appConfig.telegramStrategy}`);
+				throw new Error(
+					`The value of telegram strategy is erroneous: ${this.appConfig.telegramStrategy}`,
+				);
 			}
 		}
 	}
