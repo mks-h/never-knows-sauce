@@ -1,4 +1,6 @@
 {
 	"hello.world": "Hello World!",
-	"greetings": "Hello, {{userName}}"
+	"command.start.message": "Hi! 👋\nJust send a name of an anime, and I'll find you its Hikka & AniList listings.",
+	"command.unrecognized": "Sowwy, this command is not suppowted…",
+	"source.not.found": "Sowwy, I couldn't find it…"
 }
