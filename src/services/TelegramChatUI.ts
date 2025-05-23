@@ -4,17 +4,19 @@ import { TelegramApiClient, TgMessage } from "./TelegramApiClient.ts";
 import { fetchAniListMedia } from "../providers/AniListProvider.ts";
 import { ProviderResponse } from "../providers/ProviderResponse.ts";
 import { LocalizationService } from "./LocalizationService.ts";
+import { AppConfig } from "../config/AppConfig.ts";
 
-type FetchedInfo = {
-	hikka?: ProviderResponse;
-	anilist?: ProviderResponse;
-};
+const Writings = ["english", "romaji", "native", "ukrainian"] as const;
+const Sources = ["hikka", "anilist"] as const;
+
+type FetchedInfo = { [key in (typeof Sources)[number]]?: ProviderResponse };
 
 export class TelegramChatUI {
 	constructor(
 		private logger: Logger,
 		private client: TelegramApiClient,
 		private l10n: LocalizationService,
+		private appConfig: AppConfig,
 	) {}
 
 	protected async fetchInformation(
@@ -41,15 +43,39 @@ export class TelegramChatUI {
 			return this.l10n.getTranslation("source.not.found");
 		}
 
-		const title = info.hikka?.title.ukrainian ??
-			info.hikka?.title.english ?? info.anilist?.title.english ??
-			info.hikka?.title.romaji ?? info.anilist?.title.romaji ??
-			info.hikka?.title.native ?? info.anilist?.title.native;
+		const { hikka, anilist } = info;
 
-		let msg = `<a href="${info.hikka?.url ?? info.anilist?.url}">${title}</a>`;
+		const { result: title } = fallback(
+			this.appConfig.preferredWriting,
+			Writings,
+			(writing) => {
+				switch (writing) {
+					case "ukrainian":
+						return hikka?.title.ukrainian;
+					case "english":
+						return hikka?.title.english ?? anilist?.title.english;
+					case "romaji":
+						return hikka?.title.romaji ?? anilist?.title.romaji;
+					case "native":
+						return hikka?.title.native ?? anilist?.title.native;
+				}
+			},
+		);
 
-		if (info.hikka && info.anilist) {
-			msg += ` | <a href="${info.anilist.url}">AL</a>`;
+		const { result: url, leftovers: otherSources } = fallback(
+			this.appConfig.preferredSource,
+			Sources,
+			(source) => {
+				return info[source]?.url;
+			},
+		);
+
+		let msg = `<b><a href="${url}">${title}</a></b>`;
+
+		for (const source of otherSources) {
+			if (info[source]) {
+				msg += ` • <a href="${info[source].url}">${mapSourceName(source)}</a>`;
+			}
 		}
 
 		this.logger.debug`REPLY: ${msg}`;
@@ -111,5 +137,37 @@ class MessageFacts {
 
 	get isCommand(): boolean {
 		return !!this.message.entities?.find((v) => v.type === "bot_command");
+	}
+}
+
+function fallback<T, U>(
+	preferred: T,
+	options: readonly T[],
+	cb: (value: T[][number]) => U | undefined,
+): {
+	result: U | undefined;
+	leftovers: T[][number][];
+} {
+	const queue = options.slice();
+	let res;
+	do {
+		res = cb(preferred);
+		const preferredIndex = queue.findIndex((v) => v === preferred);
+		if (preferredIndex > -1) {
+			queue.splice(preferredIndex, 1);
+		}
+
+		if (!queue[0]) break;
+		else preferred = queue[0];
+	} while (!res && queue.length !== 0);
+	return { result: res, leftovers: queue };
+}
+
+function mapSourceName(source: (typeof Sources)[number]): string {
+	switch (source) {
+		case "hikka":
+			return "Hikka";
+		case "anilist":
+			return "AniList";
 	}
 }

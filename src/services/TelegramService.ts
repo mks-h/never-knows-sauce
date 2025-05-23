@@ -2,6 +2,7 @@ import { Logger } from "@logtape/logtape";
 import { TelegramApiClient, TgBot, TgUpdate } from "./TelegramApiClient.ts";
 import { TelegramChatUI } from "./TelegramChatUI.ts";
 import { LocalizationService } from "./LocalizationService.ts";
+import { AppConfig } from "../config/AppConfig.ts";
 
 export enum TelegramStrategy {
 	Webhook = "Webhook",
@@ -17,12 +18,14 @@ export class TelegramBotService {
 		private logger: Logger,
 		token: string,
 		l10n: LocalizationService,
+		appConfig: AppConfig,
 	) {
 		this.client = new TelegramApiClient(logger.getChild("api"), token);
 		this.chatUI = new TelegramChatUI(
 			logger.getChild("chat-ui"),
 			this.client,
 			l10n,
+			appConfig,
 		);
 		this.logger.info`Constructed Telegram Bot service`;
 	}

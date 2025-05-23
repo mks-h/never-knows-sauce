@@ -24,6 +24,7 @@ export class Application {
 			this.logger.getChild("telegram-bot-service"),
 			this.appConfig.telegramToken,
 			this.l10n,
+			this.appConfig,
 		);
 
 		const me = await tgService.identifyBot();

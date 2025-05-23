@@ -6,10 +6,19 @@ export interface AppConfig {
 	telegramToken: string;
 	telegramStrategy: TelegramStrategy;
 	defaultLanguage: (typeof DefaultLanguageOptions)[number];
+	preferredWriting: (typeof PreferredWritingOptions)[number];
+	preferredSource: (typeof PreferredSourceOptions)[number];
 	isDebug: boolean;
 }
 
 const DefaultLanguageOptions = ["en", "ua"] as const;
+const PreferredWritingOptions = [
+	"english",
+	"romaji",
+	"native",
+	"ukrainian",
+] as const;
+const PreferredSourceOptions = ["anilist", "hikka"] as const;
 
 export const prepareAppConfig = (): AppConfig => {
 	const required = getRequiredVars();
@@ -19,6 +28,11 @@ export const prepareAppConfig = (): AppConfig => {
 		dbConnectionString: required.DB_CONNECTION_STRING,
 		telegramToken: required.TELEGRAM_TOKEN,
 		telegramStrategy: validateTelegramStrategy(required.TELEGRAM_STRATEGY),
+		preferredWriting: validate(
+			optional.PREFERED_WRITING,
+			PreferredWritingOptions,
+		),
+		preferredSource: validate(optional.PREFERED_SOURCE, PreferredSourceOptions),
 		defaultLanguage: validate(
 			optional.DEFAULT_LANGUAGE,
 			DefaultLanguageOptions,
@@ -51,6 +65,8 @@ function getOptionalVars() {
 	const optionalVars = {
 		// VARIABLE_NAME: "DEFAULT VALUE"
 		DEFAULT_LANGUAGE: "en",
+		PREFERED_WRITING: "english",
+		PREFERED_SOURCE: "anilist",
 		DEBUG: "0",
 	} as const;
 
