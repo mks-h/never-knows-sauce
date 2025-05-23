@@ -5,9 +5,11 @@ export interface AppConfig {
 	dbConnectionString: string;
 	telegramToken: string;
 	telegramStrategy: TelegramStrategy;
-	defaultLanguage: string;
+	defaultLanguage: (typeof DefaultLanguageOptions)[number];
 	isDebug: boolean;
 }
+
+const DefaultLanguageOptions = ["en", "ua"] as const;
 
 export const prepareAppConfig = (): AppConfig => {
 	const required = getRequiredVars();
@@ -17,7 +19,10 @@ export const prepareAppConfig = (): AppConfig => {
 		dbConnectionString: required.DB_CONNECTION_STRING,
 		telegramToken: required.TELEGRAM_TOKEN,
 		telegramStrategy: validateTelegramStrategy(required.TELEGRAM_STRATEGY),
-		defaultLanguage: optional.DEFAULT_LANGUAGE,
+		defaultLanguage: validate(
+			optional.DEFAULT_LANGUAGE,
+			DefaultLanguageOptions,
+		),
 		isDebug: optional.DEBUG === "1",
 	};
 };
@@ -70,5 +75,17 @@ function validateTelegramStrategy(value: string) {
 			throw new Error(
 				`The specified telegram strategy is not expected: ${value}`,
 			);
+	}
+}
+
+function validate<T extends readonly string[]>(
+	value: string,
+	possibleValues: T,
+): T[number] {
+	if (possibleValues.includes(value)) return value;
+	else {
+		throw new Error(
+			`The specified preferred writing is not expected: ${value}`,
+		);
 	}
 }
